@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: fixflow
+  datasource:
+    # En local usa el Postgres de docker-compose; en producción, variables de entorno (Supabase)
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fixflow}
+    username: ${DB_USER:fixflow}
+    password: ${DB_PASSWORD:fixflow}
+  jpa:
+    hibernate:
+      ddl-auto: validate   # El esquema lo gestiona Flyway, Hibernate solo comprueba
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: ${PORT:8080}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
