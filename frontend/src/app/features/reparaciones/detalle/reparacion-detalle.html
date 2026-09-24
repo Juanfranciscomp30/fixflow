@@ -1,0 +1,176 @@
+<a mat-button routerLink="/reparaciones" class="volver">
+  <mat-icon fontSet="material-symbols-outlined">arrow_back</mat-icon>
+  Reparaciones
+</a>
+
+@if (error(); as mensaje) {
+  <p class="aviso-error">{{ mensaje }}</p>
+} @else if (reparacion(); as r) {
+  <header class="cabecera">
+    <h1 class="codigo">{{ r.codigo }}</h1>
+    <app-estado-chip [estado]="r.estado" />
+  </header>
+
+  @if (procesando()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div class="rejilla">
+    <!-- Siguiente paso: cambia según el estado -->
+    @if (r.estado !== 'ENTREGADO') {
+      <mat-card appearance="outlined" class="paso">
+        <mat-card-header><mat-card-title>Siguiente paso</mat-card-title></mat-card-header>
+        <mat-card-content>
+          @switch (r.estado) {
+            @case ('RECIBIDO') {
+              <p>El equipo está en el taller esperando a que un técnico lo revise.</p>
+              <button mat-flat-button (click)="avanzar('DIAGNOSTICO')" [disabled]="procesando()">
+                Empezar diagnóstico
+              </button>
+            }
+            @case ('DIAGNOSTICO') {
+              <form [formGroup]="diagnosticoForm" (ngSubmit)="guardarDiagnostico()">
+                <mat-form-field class="ancho-completo">
+                  <mat-label>Diagnóstico</mat-label>
+                  <textarea matInput formControlName="diagnostico" rows="3"></textarea>
+                  <mat-error>Escribe el diagnóstico</mat-error>
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Presupuesto</mat-label>
+                  <input matInput type="number" min="0" step="0.01" formControlName="presupuesto" />
+                  <span matTextSuffix>€</span>
+                  <mat-error>Indica un presupuesto válido</mat-error>
+                </mat-form-field>
+                <div class="botones">
+                  <button mat-stroked-button type="submit" [disabled]="procesando()">Guardar diagnóstico</button>
+                  <button
+                    mat-flat-button
+                    type="button"
+                    (click)="avanzar('ESPERANDO_APROBACION')"
+                    [disabled]="procesando() || r.diagnostico === null || diagnosticoForm.dirty"
+                  >
+                    Enviar presupuesto al cliente
+                  </button>
+                </div>
+                @if (r.diagnostico === null || diagnosticoForm.dirty) {
+                  <p class="nota">Guarda el diagnóstico antes de enviar el presupuesto.</p>
+                }
+              </form>
+            }
+            @case ('ESPERANDO_APROBACION') {
+              <p>
+                Presupuesto enviado: <strong>{{ r.presupuesto | currency: 'EUR' }}</strong>.
+                ¿Qué ha respondido el cliente?
+              </p>
+              <div class="botones">
+                <button mat-flat-button (click)="responderPresupuesto(true)" [disabled]="procesando()">
+                  Acepta
+                </button>
+                <button mat-stroked-button (click)="responderPresupuesto(false)" [disabled]="procesando()">
+                  Rechaza
+                </button>
+              </div>
+            }
+            @case ('EN_REPARACION') {
+              <p>El cliente aceptó el presupuesto. Cuando termines, márcalo como listo.</p>
+              <button mat-flat-button (click)="avanzar('LISTO')" [disabled]="procesando()">
+                Marcar como listo
+              </button>
+            }
+            @case ('LISTO') {
+              <p>
+                {{ r.presupuestoAceptado ? 'Reparado.' : 'Sin reparar (presupuesto rechazado).' }}
+                Pendiente de que el cliente lo recoja.
+              </p>
+              <mat-form-field>
+                <mat-label>Precio final cobrado</mat-label>
+                <input matInput type="number" min="0" step="0.01" [formControl]="precioFinal" />
+                <span matTextSuffix>€</span>
+              </mat-form-field>
+              <div class="botones">
+                <button mat-flat-button (click)="entregar()" [disabled]="procesando() || precioFinal.invalid">
+                  Entregar al cliente
+                </button>
+              </div>
+            }
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <mat-card appearance="outlined">
+      <mat-card-header><mat-card-title>Cliente</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <dl>
+          <dt>Nombre</dt><dd>{{ r.cliente.nombre }}</dd>
+          <dt>Teléfono</dt><dd>{{ r.cliente.telefono }}</dd>
+          @if (r.cliente.email) {
+            <dt>Email</dt><dd>{{ r.cliente.email }}</dd>
+          }
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header><mat-card-title>Equipo</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <dl>
+          <dt>Tipo</dt><dd>{{ etiquetaTipo[r.equipo.tipo] }}</dd>
+          <dt>Marca y modelo</dt><dd>{{ r.equipo.marca }} {{ r.equipo.modelo }}</dd>
+          @if (r.equipo.numeroSerie) {
+            <dt>Nº de serie</dt><dd>{{ r.equipo.numeroSerie }}</dd>
+          }
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header><mat-card-title>Reparación</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <dl>
+          <dt>Avería descrita</dt><dd class="texto">{{ r.averiaDescrita }}</dd>
+          @if (r.diagnostico) {
+            <dt>Diagnóstico</dt><dd class="texto">{{ r.diagnostico }}</dd>
+          }
+          @if (r.presupuesto !== null) {
+            <dt>Presupuesto</dt>
+            <dd>
+              {{ r.presupuesto | currency: 'EUR' }}
+              @if (r.presupuestoAceptado === true) { · aceptado }
+              @if (r.presupuestoAceptado === false) { · rechazado }
+            </dd>
+          }
+          @if (r.precioFinal !== null) {
+            <dt>Precio final</dt><dd>{{ r.precioFinal | currency: 'EUR' }}</dd>
+          }
+          <dt>Entrada</dt><dd>{{ r.fechaEntrada | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          @if (r.fechaEntrega) {
+            <dt>Entregado</dt><dd>{{ r.fechaEntrega | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          }
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header><mat-card-title>Historial</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <ol class="historial">
+          @for (h of r.historial; track $index) {
+            <li>
+              <span class="fecha">{{ h.fecha | date: 'dd/MM HH:mm' }}</span>
+              <span>
+                <strong>{{ etiquetaEstado[h.estadoNuevo] }}</strong>
+                @if (h.usuarioNombre) { · {{ h.usuarioNombre }} }
+                @if (h.comentario) {
+                  <br /><span class="comentario">{{ h.comentario }}</span>
+                }
+              </span>
+            </li>
+          }
+        </ol>
+      </mat-card-content>
+    </mat-card>
+  </div>
+} @else {
+  <mat-progress-bar mode="indeterminate" />
+}

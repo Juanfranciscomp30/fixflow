@@ -1,0 +1,71 @@
+<h1>Nueva reparación</h1>
+
+<form [formGroup]="form" (ngSubmit)="guardar()" class="formulario">
+  <mat-card appearance="outlined" formGroupName="cliente">
+    <mat-card-header><mat-card-title>Cliente</mat-card-title></mat-card-header>
+    <mat-card-content class="campos">
+      <mat-form-field>
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre" autocomplete="off" />
+        <mat-error>El nombre es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="telefono" type="tel" autocomplete="off" />
+        <mat-hint>El cliente lo usará para consultar el estado</mat-hint>
+        <mat-error>Introduce un teléfono válido</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Email (opcional)</mat-label>
+        <input matInput formControlName="email" type="email" autocomplete="off" />
+        <mat-error>Email no válido</mat-error>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" formGroupName="equipo">
+    <mat-card-header><mat-card-title>Equipo</mat-card-title></mat-card-header>
+    <mat-card-content class="campos">
+      <mat-form-field>
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          @for (tipo of tipos; track tipo[0]) {
+            <mat-option [value]="tipo[0]">{{ tipo[1] }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>Indica el tipo de equipo</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Marca</mat-label>
+        <input matInput formControlName="marca" autocomplete="off" />
+        <mat-error>La marca es obligatoria</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Modelo (opcional)</mat-label>
+        <input matInput formControlName="modelo" autocomplete="off" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Nº de serie (opcional)</mat-label>
+        <input matInput formControlName="numeroSerie" autocomplete="off" />
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header><mat-card-title>Avería</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <mat-form-field class="ancho-completo">
+        <mat-label>¿Qué le pasa según el cliente?</mat-label>
+        <textarea matInput formControlName="averiaDescrita" rows="4"></textarea>
+        <mat-error>Describe la avería</mat-error>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="acciones">
+    <a mat-button routerLink="/reparaciones">Cancelar</a>
+    <button mat-flat-button type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : 'Registrar entrada' }}
+    </button>
+  </div>
+</form>

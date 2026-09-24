@@ -1,0 +1,21 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  column-gap: 16px;
+  padding-top: 8px;
+}
+
+.ancho-completo { width: 100%; padding-top: 8px; }
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
