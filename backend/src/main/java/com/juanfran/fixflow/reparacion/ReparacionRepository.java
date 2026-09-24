@@ -11,7 +11,6 @@ public interface ReparacionRepository extends JpaRepository<Reparacion, Long> {
 
     Optional<Reparacion> findByCodigo(String codigo);
 
-    List<Reparacion> findByTecnicoId(Long tecnicoId);
 
     List<Reparacion> findByEstado(EstadoReparacion estado);
 
@@ -25,4 +24,10 @@ public interface ReparacionRepository extends JpaRepository<Reparacion, Long> {
 
     @EntityGraph(attributePaths = {"equipo", "equipo.cliente", "tecnico"})
     List<Reparacion> findByEstadoOrderByFechaEntradaDesc(EstadoReparacion estado);
+
+    @EntityGraph(attributePaths = {"equipo", "equipo.cliente", "tecnico"})
+    List<Reparacion> findByTecnicoIdOrderByFechaEntradaDesc(Long tecnicoId);
+
+    @EntityGraph(attributePaths = {"equipo", "equipo.cliente", "tecnico"})
+    List<Reparacion> findByTecnicoIdAndEstadoOrderByFechaEntradaDesc(Long tecnicoId, EstadoReparacion estado);
 }

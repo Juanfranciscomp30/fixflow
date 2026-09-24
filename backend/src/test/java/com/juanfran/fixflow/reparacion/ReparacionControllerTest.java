@@ -62,7 +62,7 @@ class ReparacionControllerTest {
 
     @Test
     void listaFiltrandoPorEstado() throws Exception {
-        when(service.listar(EstadoReparacion.LISTO)).thenReturn(List.of(new ReparacionResumen(
+        when(service.listar(eq(EstadoReparacion.LISTO), any())).thenReturn(List.of(new ReparacionResumen(
                 14L, "FX-2026-00014", EstadoReparacion.LISTO, "José Luis Fernández", null, "Samsung Galaxy S21",
                 "No le funciona el altavoz", "Marta Sánchez", Instant.parse("2026-03-15T10:00:00Z"))));
 
