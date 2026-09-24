@@ -90,9 +90,24 @@ stateDiagram-v2
     ENTREGADO --> [*]
 ```
 
+## Demo
+
+| Rol | Email | Contraseña |
+|---|---|---|
+| Administrador | admin@fixflow.demo | Demo1234! |
+| Técnico | marta@fixflow.demo | Demo1234! |
+
 ## Decisiones técnicas
 
-- **Las transiciones de estado se validan en el backend** (`EstadoReparacion`), no solo en la interfaz.
+- **JWT en lugar de sesiones**: el frontend (Vercel) y la API (otro servidor) están en dominios distintos,
+  y un token en la cabecera `Authorization` evita depender de cookies entre dominios. La API no guarda
+  estado, así que puede escalar o reiniciarse sin cerrar la sesión de nadie. Se valida con el
+  *resource server* de Spring Security en lugar de un filtro hecho a mano.
+- **Mismo error para email inexistente y contraseña incorrecta**, para no revelar qué usuarios existen.
+- **Las reglas del taller viven en la entidad `Reparacion`** (`cambiarEstado`): no se puede pedir
+  aprobación sin presupuesto ni reparar sin que el cliente acepte, llegue la petición de donde llegue.
+- **Esquema gestionado con Flyway** y Hibernate en modo `validate`: la base de datos solo cambia
+  mediante migraciones versionadas.
 - **El cliente no tiene cuenta**: consulta su reparación con el código del resguardo y los últimos
   4 dígitos de su teléfono. En un taller real nadie se registra para recoger un portátil.
 - **Historial de estados** para saber quién cambió qué y cuándo.
