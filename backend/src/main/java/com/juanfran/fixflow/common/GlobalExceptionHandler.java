@@ -21,6 +21,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    ProblemDetail noEncontrado(RecursoNoEncontradoException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
     @ExceptionHandler(ReglaDeNegocioException.class)
     ProblemDetail reglaDeNegocio(ReglaDeNegocioException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
