@@ -113,13 +113,32 @@ stateDiagram-v2
 - **Historial de estados** para saber quién cambió qué y cuándo.
 - **Bloqueo optimista** (`version`) para que dos técnicos no pisen la misma reparación.
 
+## API de reparaciones
+
+Todas requieren el JWT de `POST /api/auth/login` en la cabecera `Authorization: Bearer …`.
+
+| Método | Ruta | Qué hace |
+|---|---|---|
+| `GET` | `/api/reparaciones?estado=` | Listado (filtro opcional por estado) |
+| `GET` | `/api/reparaciones/{id}` | Ficha completa con historial |
+| `POST` | `/api/reparaciones` | Recepción: cliente + equipo + avería |
+| `PUT` | `/api/reparaciones/{id}/diagnostico` | Diagnóstico y presupuesto |
+| `PATCH` | `/api/reparaciones/{id}/estado` | Avanzar de estado (y precio final al entregar) |
+| `POST` | `/api/reparaciones/{id}/respuesta-presupuesto` | El cliente acepta o rechaza; avanza solo a reparación o a listo |
+
+Los códigos (`FX-2026-00022`) salen de una secuencia de Postgres: se pueden dictar por teléfono y
+escribir en el resguardo. Cada cambio de estado guarda en el historial quién lo hizo (el usuario del token).
+
 ## Limitaciones y próximos pasos
 
-<!-- Ve rellenándolo según avances -->
+- **El frontend aún no tiene pantalla de login**, así que las pantallas de reparaciones no pueden
+  llamar a la API hasta que se añada (interceptor que envíe el token + guard de rutas).
+- Cada recepción crea un cliente nuevo; buscar un cliente existente llega con la ficha de clientes.
+- Falta asignar técnico desde la interfaz (la entidad ya lo permite).
 
 ## Ejecutar en local
 
-Requisitos: Java 21, Node 24, Docker (para la base de datos local).
+Requisitos: Java 21, Node 24 (o ≥ 22.22), Docker (para la base de datos local).
 
 ```bash
 # 1. Base de datos

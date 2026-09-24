@@ -1,2 +1,8 @@
 .brand { margin-left: 8px; font-weight: 500; }
+.nav { margin-left: 24px; }
+.nav .activo { background: var(--mat-sys-surface-container-high); }
 .contenido { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+@media (max-width: 600px) {
+  .contenido { padding: 16px; }
+}
