@@ -19,6 +19,10 @@ server:
 app:
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+  jwt:
+    # Valor solo para desarrollo. En producción se define JWT_SECRET (mínimo 32 caracteres).
+    secret: ${JWT_SECRET:dev-secreto-local-solo-para-desarrollo-no-usar}
+    expiracion: 8h   # Una jornada de taller
 
 management:
   endpoints:
