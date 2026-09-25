@@ -24,9 +24,6 @@ public class AuthController {
     /** Devuelve quién está autenticado según el token. El frontend lo usa al recargar la página. */
     @GetMapping("/me")
     public UsuarioActual me(@AuthenticationPrincipal Jwt jwt) {
-        return new UsuarioActual(
-                Long.valueOf(jwt.getSubject()),
-                jwt.getClaimAsString("nombre"),
-                Rol.valueOf(jwt.getClaimAsString("rol")));
+        return UsuarioActual.desde(jwt);
     }
 }

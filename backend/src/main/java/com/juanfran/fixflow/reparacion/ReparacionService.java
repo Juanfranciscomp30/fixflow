@@ -1,5 +1,6 @@
 package com.juanfran.fixflow.reparacion;
 
+import com.juanfran.fixflow.auth.UsuarioActual;
 import com.juanfran.fixflow.cliente.Cliente;
 import com.juanfran.fixflow.cliente.ClienteRepository;
 import com.juanfran.fixflow.common.RecursoNoEncontradoException;
@@ -56,10 +57,21 @@ public class ReparacionService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReparacionResumen> listar(EstadoReparacion estado) {
-        List<Reparacion> resultado = estado == null
+    public List<ReparacionResumen> listar(EstadoReparacion estado, UsuarioActual usuario) {
+        List<Reparacion> resultado;
+
+        if (usuario.esAdmin()) {
+            // El admin ve todas (esto es lo que ya tenías)
+            resultado = estado == null
                 ? reparaciones.findAllByOrderByFechaEntradaDesc()
                 : reparaciones.findByEstadoOrderByFechaEntradaDesc(estado);
+        } else {
+            // El técnico solo ve las suyas
+            resultado = estado == null
+                ? reparaciones.findAllByOrderByFechaEntradaDesc()
+                : reparaciones.findByTecnicoIdAndEstadoOrderByFechaEntradaDesc(usuario.id(), estado);
+        }
+
         return resultado.stream().map(ReparacionResumen::de).toList();
     }
 

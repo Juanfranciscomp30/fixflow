@@ -1,5 +1,6 @@
 package com.juanfran.fixflow.reparacion;
 
+import com.juanfran.fixflow.auth.UsuarioActual;
 import com.juanfran.fixflow.reparacion.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,9 @@ public class ReparacionController {
     }
 
     @GetMapping
-    public List<ReparacionResumen> listar(@RequestParam(required = false) EstadoReparacion estado) {
-        return service.listar(estado);
+    public List<ReparacionResumen> listar(@RequestParam(required = false) EstadoReparacion estado,
+                                          @AuthenticationPrincipal Jwt jwt) {
+        return service.listar(estado, UsuarioActual.desde(jwt));
     }
 
     @GetMapping("/{id}")
