@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,6 +54,12 @@ class ReparacionControllerTest {
     /** Técnico con id 2, como Antonio Ruiz en los datos de demo. */
     private static RequestPostProcessor tecnico() {
         return jwt().jwt(j -> j.subject("2").claim("rol", "TECNICO"));
+    }
+
+    /** Admin con id 1, como Carmen Ortiz en los datos de demo. */
+    private static RequestPostProcessor admin() {
+        return jwt().jwt(j -> j.subject("1").claim("rol", "ADMIN"))
+                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
     @Test
@@ -115,6 +122,23 @@ class ReparacionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON).content("{ \"estado\": \"LISTO\" }"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value("No se puede pasar de RECIBIDO a LISTO"));
+    }
+
+    @Test
+    void elAdminPuedeAsignarTecnico() throws Exception {
+        when(service.asignarTecnico(eq(20L), any())).thenReturn(detalle(20L));
+
+        mvc.perform(patch("/api/reparaciones/20/tecnico").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON).content("{ \"tecnicoId\": 3 }"))
+                .andExpect(status().isOk());
+        verify(service).asignarTecnico(eq(20L), any());
+    }
+
+    @Test
+    void unTecnicoNoPuedeAsignarReparaciones() throws Exception {
+        mvc.perform(patch("/api/reparaciones/20/tecnico").with(tecnico())
+                        .contentType(MediaType.APPLICATION_JSON).content("{ \"tecnicoId\": 3 }"))
+                .andExpect(status().isForbidden());
     }
 
     private static ReparacionDetalle detalle(Long id) {

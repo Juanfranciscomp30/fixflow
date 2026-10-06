@@ -8,6 +8,7 @@ import com.juanfran.fixflow.common.ReglaDeNegocioException;
 import com.juanfran.fixflow.equipo.Equipo;
 import com.juanfran.fixflow.equipo.EquipoRepository;
 import com.juanfran.fixflow.reparacion.dto.*;
+import com.juanfran.fixflow.usuario.Rol;
 import com.juanfran.fixflow.usuario.Usuario;
 import com.juanfran.fixflow.usuario.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,7 @@ public class ReparacionService {
         } else {
             // El técnico solo ve las suyas
             resultado = estado == null
-                ? reparaciones.findAllByOrderByFechaEntradaDesc()
+                ? reparaciones.findByTecnicoIdOrderByFechaEntradaDesc(usuario.id())
                 : reparaciones.findByTecnicoIdAndEstadoOrderByFechaEntradaDesc(usuario.id(), estado);
         }
 
@@ -88,6 +89,18 @@ public class ReparacionService {
         }
         reparacion.registrarDiagnostico(req.diagnostico().trim());
         reparacion.fijarPresupuesto(req.presupuesto());
+        return detalle(reparacion);
+    }
+
+    /** Solo el admin reparte el trabajo: asigna la reparación a un técnico activo. */
+    public ReparacionDetalle asignarTecnico(Long id, AsignarTecnicoRequest req) {
+        Reparacion reparacion = buscar(id);
+        Usuario tecnico = usuarios.findById(req.tecnicoId())
+            .orElseThrow(() -> new RecursoNoEncontradoException("No existe el usuario " + req.tecnicoId()));
+        if (tecnico.getRol() != Rol.TECNICO || !tecnico.isActivo()) {
+            throw new ReglaDeNegocioException("Solo se puede asignar a un técnico activo");
+        }
+        reparacion.asignarTecnico(tecnico);
         return detalle(reparacion);
     }
 

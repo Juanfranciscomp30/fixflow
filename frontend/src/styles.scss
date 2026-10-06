@@ -1,21 +1,76 @@
 @use '@angular/material' as mat;
 
+/*
+ * Identidad visual de FixFlow: el banco de trabajo de un taller.
+ *  - Grafito: la alfombrilla antiestática y el mostrador.
+ *  - Verde ESD: el color principal (botones, enlaces).
+ *  - Manila: las etiquetas de resguardo que se atan a cada equipo.
+ *  - Amarillo señal: avisos y lo que está esperando a alguien.
+ */
+:root {
+  --ff-grafito: #1f2a30;
+  --ff-grafito-2: #2b3940;
+  --ff-banco: #eef1f2;
+  --ff-papel: #ffffff;
+  --ff-manila: #f4e6bf;
+  --ff-manila-borde: #dcc78f;
+  --ff-esd: #1d7a74;
+  --ff-senal: #f2b705;
+  --ff-tinta: #1b2226;
+  --ff-tinta-suave: #5b6870;
+  --ff-linea: #d5dcdf;
+  --ff-radio: 10px;
+  --ff-fuente: 'Archivo', system-ui, sans-serif;
+  --ff-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
 html {
   color-scheme: light;
   @include mat.theme((
     color: (
-      primary: mat.$azure-palette,
-      tertiary: mat.$orange-palette,
+      primary: mat.$cyan-palette,
+      tertiary: mat.$yellow-palette,
     ),
-    typography: Roboto,
+    typography: (plain-family: var(--ff-fuente), brand-family: var(--ff-fuente)),
     density: 0,
+  ));
+  // Ajustamos los tokens de Material a nuestra paleta
+  @include mat.theme-overrides((
+    primary: var(--ff-esd),
+    on-primary: #ffffff,
+    surface: var(--ff-banco),
+    surface-container-lowest: var(--ff-papel),
+    on-surface: var(--ff-tinta),
+    on-surface-variant: var(--ff-tinta-suave),
+    outline-variant: var(--ff-linea),
+    corner-full: 8px,
   ));
 }
 
 html, body { height: 100%; }
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  font-family: var(--ff-fuente);
+  background: var(--ff-banco);
+  color: var(--ff-tinta);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--ff-fuente);
+  font-stretch: 85%;
+  letter-spacing: -0.01em;
+}
+
+/* Los códigos de resguardo se dictan por teléfono: tipografía de ancho fijo para leerlos bien */
+.codigo-resguardo {
+  font-family: var(--ff-mono);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+:focus-visible { outline: 2px solid var(--ff-esd); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

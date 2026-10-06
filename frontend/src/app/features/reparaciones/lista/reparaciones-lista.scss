@@ -10,12 +10,19 @@
 
 .filtros { display: block; margin: 16px 0; }
 
-.tabla { width: 100%; }
+.tabla-marco {
+  border: 1px solid var(--ff-linea);
+  border-radius: var(--ff-radio);
+  overflow: hidden;
+  background: var(--ff-papel);
+}
+
+.tabla { width: 100%; background: var(--ff-papel); }
 
 .fila { cursor: pointer; }
 .fila:hover { background: var(--mat-sys-surface-container); }
 
-.codigo { font-family: monospace; font-weight: 500; white-space: nowrap; }
+.codigo { white-space: nowrap; }
 .tipo { color: var(--mat-sys-on-surface-variant); }
 
 .averia {

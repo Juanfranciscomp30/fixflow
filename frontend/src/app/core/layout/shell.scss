@@ -1,0 +1,121 @@
+.marco {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.lateral {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 14px;
+  background: var(--ff-grafito);
+  color: #d9e2e5;
+  box-sizing: border-box;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 20px;
+  font-stretch: 90%;
+
+  mat-icon { color: var(--ff-senal); }
+}
+
+.menu { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+
+.enlace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover { background: var(--ff-grafito-2); }
+
+  &.activo {
+    background: var(--ff-grafito-2);
+    color: #fff;
+    box-shadow: inset 3px 0 0 var(--ff-senal);
+  }
+}
+
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 6px 0 10px;
+  border-top: 1px solid var(--ff-grafito-2);
+
+  button { color: #d9e2e5; margin-left: auto; }
+}
+
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ff-esd);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+
+  strong { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  small { color: #93a3aa; }
+}
+
+.contenido {
+  min-width: 0;
+  padding: 28px 32px 48px;
+}
+
+/* En móvil el menú lateral pasa a ser una barra inferior */
+@media (max-width: 800px) {
+  .marco { grid-template-columns: 1fr; }
+
+  .lateral {
+    position: fixed;
+    inset: auto 0 0 0;
+    height: auto;
+    z-index: 10;
+    flex-direction: row;
+    padding: 6px;
+  }
+
+  .marca, .usuario .datos, .usuario .avatar { display: none; }
+  .usuario { border: 0; padding: 0; }
+
+  .menu { flex-direction: row; justify-content: space-around; }
+
+  .enlace {
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 8px;
+    font-size: 11px;
+
+    &.activo { box-shadow: inset 0 -3px 0 var(--ff-senal); }
+  }
+
+  .contenido { padding: 16px 16px 96px; }
+}

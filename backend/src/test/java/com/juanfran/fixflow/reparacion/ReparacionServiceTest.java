@@ -7,12 +7,16 @@ import com.juanfran.fixflow.common.ReglaDeNegocioException;
 import com.juanfran.fixflow.equipo.Equipo;
 import com.juanfran.fixflow.equipo.EquipoRepository;
 import com.juanfran.fixflow.equipo.TipoEquipo;
+import com.juanfran.fixflow.auth.UsuarioActual;
+import com.juanfran.fixflow.reparacion.dto.AsignarTecnicoRequest;
 import com.juanfran.fixflow.reparacion.dto.CambioEstadoRequest;
 import com.juanfran.fixflow.reparacion.dto.DiagnosticoRequest;
 import com.juanfran.fixflow.reparacion.dto.NuevaReparacionRequest;
 import com.juanfran.fixflow.reparacion.dto.NuevaReparacionRequest.DatosCliente;
 import com.juanfran.fixflow.reparacion.dto.NuevaReparacionRequest.DatosEquipo;
 import com.juanfran.fixflow.reparacion.dto.RespuestaPresupuestoRequest;
+import com.juanfran.fixflow.usuario.Rol;
+import com.juanfran.fixflow.usuario.Usuario;
 import com.juanfran.fixflow.usuario.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -136,6 +140,36 @@ class ReparacionServiceTest {
         when(reparaciones.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.obtener(99L)).isInstanceOf(RecursoNoEncontradoException.class);
+    }
+
+    @Test
+    void asignaLaReparacionAUnTecnicoActivo() {
+        Reparacion reparacion = reparacionEn(EstadoReparacion.RECIBIDO);
+        when(usuarios.findById(3L)).thenReturn(Optional.of(
+                new Usuario("Marta Sánchez", "marta@fixflow.demo", "hash", Rol.TECNICO)));
+
+        var detalle = service.asignarTecnico(1L, new AsignarTecnicoRequest(3L));
+
+        assertThat(detalle.tecnicoNombre()).isEqualTo("Marta Sánchez");
+        assertThat(reparacion.getTecnico().getNombre()).isEqualTo("Marta Sánchez");
+    }
+
+    @Test
+    void noSePuedeAsignarAUnAdmin() {
+        reparacionEn(EstadoReparacion.RECIBIDO);
+        when(usuarios.findById(1L)).thenReturn(Optional.of(
+                new Usuario("Carmen Ortiz", "admin@fixflow.demo", "hash", Rol.ADMIN)));
+
+        assertThatThrownBy(() -> service.asignarTecnico(1L, new AsignarTecnicoRequest(1L)))
+                .isInstanceOf(ReglaDeNegocioException.class);
+    }
+
+    @Test
+    void elTecnicoSinFiltroSoloVeLasSuyas() {
+        service.listar(null, new UsuarioActual(2L, "Antonio Ruiz", Rol.TECNICO));
+
+        verify(reparaciones).findByTecnicoIdOrderByFechaEntradaDesc(2L);
+        verify(reparaciones, never()).findAllByOrderByFechaEntradaDesc();
     }
 
     private Reparacion reparacionEn(EstadoReparacion estado) {
