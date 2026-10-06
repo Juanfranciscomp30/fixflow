@@ -1,0 +1,109 @@
+<header class="cabecera">
+  <div>
+    <h1>Métricas del taller</h1>
+    <p class="subtitulo">Cómo va el trabajo y lo que se ha facturado.</p>
+  </div>
+  <button mat-stroked-button (click)="exportar()">
+    <mat-icon fontSet="material-symbols-outlined">download</mat-icon>
+    Exportar reparaciones (CSV)
+  </button>
+</header>
+
+@if (error(); as mensaje) {
+  <p class="error">{{ mensaje }}</p>
+} @else if (datos(); as m) {
+  <section class="cifras" aria-label="Resumen">
+    <div class="cifra">
+      <span class="valor">{{ tiempoMedioDias() | number: '1.1-1' }} <small>días</small></span>
+      <span class="etiqueta">Tiempo medio hasta que está listo</span>
+    </div>
+    <div class="cifra">
+      <span class="valor">{{ m.abiertas }}</span>
+      <span class="etiqueta">Reparaciones abiertas</span>
+    </div>
+    <div class="cifra" [class.destacada]="m.listasParaRecoger > 0">
+      <span class="valor">{{ m.listasParaRecoger }}</span>
+      <span class="etiqueta">Listas para recoger</span>
+    </div>
+    <div class="cifra">
+      <span class="valor">{{ m.ingresosUltimos30Dias | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
+      <span class="etiqueta">Facturado en los últimos 30 días</span>
+    </div>
+  </section>
+
+  <div class="rejilla">
+    <!-- Ingresos por mes: columnas, una sola serie -->
+    <section class="panel ancho">
+      <h2>Facturación por mes</h2>
+      <div class="grafico columnas-grafico" (mouseleave)="hover.set(null)">
+        @for (b of barrasIngresos(); track b.etiquetaLarga) {
+          <div class="columna-mes">
+            <div class="pista-barra">
+              @if (b.esMax || $last) {
+                <span class="valor-directo" [style.bottom.%]="b.altura">{{ b.total | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
+              }
+              <div
+                class="barra-v"
+                [style.height.%]="b.altura"
+                (mousemove)="mostrar($event, b.textoHover)"
+              ></div>
+            </div>
+            <span class="eje">{{ b.etiqueta }}</span>
+          </div>
+        } @empty {
+          <p class="vacio">Todavía no hay entregas cobradas.</p>
+        }
+        @if (hover(); as h) {
+          <span class="tooltip" [style.left.px]="h.x" [style.top.px]="h.y">{{ h.texto }}</span>
+        }
+      </div>
+    </section>
+
+    <!-- Reparaciones por estado: barras horizontales con etiqueta directa -->
+    <section class="panel">
+      <h2>Reparaciones por estado</h2>
+      <ul class="barras-h">
+        @for (e of m.porEstado; track e.estado) {
+          <li>
+            <span class="nombre">{{ etiquetaEstado[e.estado] }}</span>
+            <span class="pista-h">
+              <span
+                class="barra-h"
+                [style.width.%]="(e.total / maxEstado()) * 100"
+                [style.background]="colorEstado[e.estado]"
+              ></span>
+            </span>
+            <span class="numero">{{ e.total }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <!-- Carga por técnico: barra apilada de dos series con leyenda -->
+    <section class="panel">
+      <h2>Carga por técnico</h2>
+      <p class="leyenda">
+        <span><i class="muestra abiertas"></i>Abiertas</span>
+        <span><i class="muestra entregadas"></i>Entregadas</span>
+      </p>
+      <ul class="barras-h tecnicos">
+        @for (t of m.cargaPorTecnico; track t.tecnico) {
+          <li>
+            <span class="nombre">{{ t.tecnico }}</span>
+            <span class="pista-h apilada">
+              @if (t.abiertas > 0) {
+                <span class="barra-h abiertas" [style.width.%]="(t.abiertas / maxCarga()) * 100"></span>
+              }
+              @if (t.entregadas > 0) {
+                <span class="barra-h entregadas" [style.width.%]="(t.entregadas / maxCarga()) * 100"></span>
+              }
+            </span>
+            <span class="numero">{{ t.abiertas }} / {{ t.entregadas }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+} @else {
+  <mat-progress-bar mode="indeterminate" />
+}
