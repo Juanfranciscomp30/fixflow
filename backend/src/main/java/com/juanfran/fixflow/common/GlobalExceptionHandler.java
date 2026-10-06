@@ -3,6 +3,7 @@ package com.juanfran.fixflow.common;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,6 +20,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     ProblemDetail credencialesInvalidas(BadCredentialsException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    // @PreAuthorize lanza esta excepción dentro del controlador: sin este handler acabaría en un 500
+    @ExceptionHandler(AccessDeniedException.class)
+    ProblemDetail sinPermiso(AccessDeniedException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "No tienes permiso para hacer esto");
     }
 
     @ExceptionHandler(RecursoNoEncontradoException.class)

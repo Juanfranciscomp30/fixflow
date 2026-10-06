@@ -4,6 +4,7 @@ import com.juanfran.fixflow.auth.UsuarioActual;
 import com.juanfran.fixflow.reparacion.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +43,13 @@ public class ReparacionController {
     @PutMapping("/{id}/diagnostico")
     public ReparacionDetalle registrarDiagnostico(@PathVariable Long id, @Valid @RequestBody DiagnosticoRequest req) {
         return service.registrarDiagnostico(id, req);
+    }
+
+    /** Solo el admin reparte el trabajo entre los técnicos. */
+    @PatchMapping("/{id}/tecnico")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ReparacionDetalle asignarTecnico(@PathVariable Long id, @Valid @RequestBody AsignarTecnicoRequest req) {
+        return service.asignarTecnico(id, req);
     }
 
     @PatchMapping("/{id}/estado")
