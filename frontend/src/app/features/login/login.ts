@@ -1,11 +1,14 @@
 import { Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { timeout } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth/auth.service';
 import { mensajeError } from '../../shared/mensaje-error';
 
@@ -44,6 +47,20 @@ export class Login {
   protected readonly entrando = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly verPassword = signal(false);
+  protected readonly servidor = signal<'despertando' | 'listo' | 'caido'>('despertando');
+
+  constructor() {
+    // En el plan gratuito de Render la API se duerme. La despertamos nada más abrir el login,
+    // así mientras la persona lee la pantalla el servidor ya va arrancando.
+    const raiz = environment.apiUrl.replace(/\/api$/, '');
+    inject(HttpClient)
+      .get(`${raiz}/actuator/health`)
+      .pipe(timeout(90_000))
+      .subscribe({
+        next: () => this.servidor.set('listo'),
+        error: () => this.servidor.set('caido'),
+      });
+  }
 
   protected entrar(): void {
     if (this.form.invalid) {

@@ -1,4 +1,4 @@
-// Producción: URL del backend desplegado (cámbiala cuando lo despliegues)
+// Producción: la API desplegada en Render (servicio "fixflow-api")
 export const environment = {
-  apiUrl: 'https://TU-BACKEND.onrender.com/api',
+  apiUrl: 'https://fixflow-api.onrender.com/api',
 };
