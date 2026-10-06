@@ -162,7 +162,31 @@
   gap: 10px;
 }
 
-.nota { margin: 14px 0 0; font-size: 13px; color: var(--ff-tinta-suave); line-height: 1.4; }
+.servidor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ff-tinta-suave);
+}
+
+.luz {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ff-senal);
+}
+
+.despertando .luz { animation: latido 1.2s ease-in-out infinite; }
+.listo .luz { background: #16a34a; }
+.caido .luz { background: var(--mat-sys-error); }
+
+@keyframes latido {
+  50% { opacity: 0.25; }
+}
 
 @media (max-width: 860px) {
   .pantalla { grid-template-columns: 1fr; }

@@ -76,7 +76,14 @@
             Técnico
           </button>
         </div>
-        <p class="nota">La API está en un plan gratuito: la primera vez puede tardar unos 30 s en despertar.</p>
+        <p [class]="'servidor ' + servidor()" role="status">
+          <span class="luz"></span>
+          @switch (servidor()) {
+            @case ('despertando') { Despertando el servidor (plan gratuito, puede tardar ~30 s)… }
+            @case ('listo') { Servidor listo }
+            @case ('caido') { El servidor no responde. Prueba a recargar en un momento. }
+          }
+        </p>
       </div>
     </form>
   </section>

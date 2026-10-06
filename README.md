@@ -179,6 +179,28 @@ npm install
 npm start
 ```
 
+## Despliegue
+
+| Pieza | Dónde | Notas |
+|---|---|---|
+| Frontend | Vercel | Directorio raíz `frontend`; Vercel detecta Angular y usa Node 24 (`engines` del `package.json`) |
+| API | Render (Docker, plan gratuito) | Directorio raíz `backend`; *health check* en `/actuator/health` |
+| Base de datos | Supabase (PostgreSQL) | Conexión por el *Session pooler* (IPv4); Flyway crea las tablas y los datos de demo |
+
+Variables de entorno de la API:
+
+| Variable | Ejemplo |
+|---|---|
+| `DB_URL` | `jdbc:postgresql://aws-0-eu-west-3.pooler.supabase.com:5432/postgres?sslmode=require` |
+| `DB_USER` | `postgres.<id-del-proyecto>` |
+| `DB_PASSWORD` | contraseña de la base de datos de Supabase |
+| `JWT_SECRET` | cadena aleatoria de 32 caracteres o más |
+| `CORS_ORIGINS` | `https://fixflow.vercel.app` (varias, separadas por comas) |
+
+El plan gratuito de Render duerme la API tras 15 minutos sin uso. Para que no se note tanto, la
+pantalla de login hace una petición a `/actuator/health` nada más abrirse y muestra si el servidor
+está despertando o listo.
+
 ## Estructura
 
 ```

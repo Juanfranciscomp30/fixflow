@@ -6,6 +6,9 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/fixflow}
     username: ${DB_USER:fixflow}
     password: ${DB_PASSWORD:fixflow}
+    hikari:
+      # El pooler gratuito de Supabase admite pocas conexiones: con 5 sobra para la demo
+      maximum-pool-size: ${DB_POOL_SIZE:5}
   jpa:
     hibernate:
       ddl-auto: validate   # El esquema lo gestiona Flyway, Hibernate solo comprueba
