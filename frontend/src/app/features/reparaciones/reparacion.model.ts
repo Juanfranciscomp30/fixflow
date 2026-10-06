@@ -19,6 +19,20 @@ export const ESTADOS: EstadoReparacion[] = [
   'ENTREGADO',
 ];
 
+/**
+ * Saltos permitidos entre estados. Es una copia de EstadoReparacion.siguientesPermitidos()
+ * del backend: aquí solo sirve para que el Kanban no deje soltar una tarjeta donde no toca.
+ * Quien manda de verdad es la API.
+ */
+export const TRANSICIONES: Record<EstadoReparacion, EstadoReparacion[]> = {
+  RECIBIDO: ['DIAGNOSTICO'],
+  DIAGNOSTICO: ['ESPERANDO_APROBACION'],
+  ESPERANDO_APROBACION: ['EN_REPARACION', 'LISTO'],
+  EN_REPARACION: ['LISTO'],
+  LISTO: ['ENTREGADO'],
+  ENTREGADO: [],
+};
+
 export const ETIQUETA_ESTADO: Record<EstadoReparacion, string> = {
   RECIBIDO: 'Recibido',
   DIAGNOSTICO: 'En diagnóstico',
@@ -85,4 +99,9 @@ export interface NuevaReparacion {
   cliente: { nombre: string; telefono: string; email: string | null };
   equipo: { tipo: TipoEquipo; marca: string; modelo: string | null; numeroSerie: string | null };
   averiaDescrita: string;
+}
+
+export interface Tecnico {
+  id: number;
+  nombre: string;
 }

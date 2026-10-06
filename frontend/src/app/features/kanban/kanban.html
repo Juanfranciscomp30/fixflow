@@ -1,0 +1,132 @@
+<header class="cabecera">
+  <div>
+    <h1>Tablero</h1>
+    @if (!cargando() && !error()) {
+      <p class="resumen">
+        {{ enTaller() }} {{ enTaller() === 1 ? 'equipo' : 'equipos' }} en el taller
+        @if (listas() > 0) {
+          <span class="aviso-recoger">{{ listas() }} {{ listas() === 1 ? 'listo' : 'listos' }} para recoger</span>
+        }
+      </p>
+    }
+  </div>
+  <a mat-flat-button routerLink="/reparaciones/nueva">
+    <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+    Nueva recepción
+  </a>
+</header>
+
+@if (cargando()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (error(); as mensaje) {
+  <p class="error">{{ mensaje }}</p>
+} @else {
+  <p class="pista">
+    <mat-icon fontSet="material-symbols-outlined">drag_pan</mat-icon>
+    Arrastra una tarjeta a la siguiente columna para avanzar la reparación.
+  </p>
+
+  <div class="tablero" cdkDropListGroup>
+    @for (estado of estados; track estado) {
+      <section
+        [class]="'columna estado-' + estado"
+        [class.destino-valido]="esDestinoValido(estado)"
+        [class.atenuada]="arrastrandoDesde() !== null && arrastrandoDesde() !== estado && !esDestinoValido(estado)"
+      >
+        <header class="columna-cabecera">
+          <span class="punto"></span>
+          <h2>{{ etiquetaEstado[estado] }}</h2>
+          <span class="contador">{{ columnas()[estado].length }}</span>
+        </header>
+
+        <div
+          class="lista"
+          cdkDropList
+          cdkDropListSortingDisabled
+          [cdkDropListData]="estado"
+          [cdkDropListEnterPredicate]="puedeEntrar"
+          (cdkDropListDropped)="soltar($event)"
+        >
+          @for (r of columnas()[estado]; track r.id) {
+            <article
+              class="tarjeta estado-{{ estado }}"
+              cdkDrag
+              [cdkDragData]="r"
+              [cdkDragDisabled]="estado === 'ENTREGADO'"
+              (cdkDragStarted)="arrastrandoDesde.set(r.estado)"
+              (cdkDragEnded)="arrastrandoDesde.set(null)"
+              (click)="abrir(r)"
+              (keydown.enter)="abrir(r)"
+              tabindex="0"
+              [attr.aria-label]="r.codigo + ', ' + r.clienteNombre"
+            >
+              <div class="tarjeta-cabecera">
+                <span class="ojal" aria-hidden="true"></span>
+                <span class="codigo-resguardo">{{ r.codigo }}</span>
+                @if (auth.esAdmin() && estado !== 'ENTREGADO') {
+                  <button
+                    mat-icon-button
+                    class="mas"
+                    [matMenuTriggerFor]="menuTecnicos"
+                    (click)="$event.stopPropagation()"
+                    aria-label="Asignar técnico"
+                  >
+                    <mat-icon fontSet="material-symbols-outlined">more_horiz</mat-icon>
+                  </button>
+                  <mat-menu #menuTecnicos="matMenu">
+                    <p class="menu-titulo">Asignar a</p>
+                    @for (t of tecnicos(); track t.id) {
+                      <button mat-menu-item (click)="asignar(r, t)">
+                        <mat-icon fontSet="material-symbols-outlined">
+                          {{ t.nombre === r.tecnicoNombre ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                        </mat-icon>
+                        {{ t.nombre }}
+                      </button>
+                    }
+                  </mat-menu>
+                }
+              </div>
+
+              <p class="equipo">{{ r.equipo }}</p>
+              <p class="averia">{{ r.averiaDescrita }}</p>
+
+              <footer class="tarjeta-pie">
+                <span class="cliente">
+                  <mat-icon fontSet="material-symbols-outlined">person</mat-icon>
+                  {{ r.clienteNombre }}
+                </span>
+                <span class="meta">
+                  @if (estado !== 'ENTREGADO') {
+                    <span
+                      class="dias"
+                      [class.retrasada]="vaRetrasada(r)"
+                      [matTooltip]="'Entró hace ' + diasEnTaller(r) + ' días'"
+                    >
+                      {{ diasEnTaller(r) === 0 ? 'Hoy' : diasEnTaller(r) + ' d' }}
+                    </span>
+                  }
+                  @if (r.tecnicoNombre) {
+                    <span class="avatar" [matTooltip]="r.tecnicoNombre">{{ iniciales(r.tecnicoNombre) }}</span>
+                  } @else {
+                    <span class="avatar sin-asignar" matTooltip="Sin técnico asignado">?</span>
+                  }
+                </span>
+              </footer>
+
+              <!-- Lo que se ve en la columna mientras arrastras -->
+              <div class="hueco" *cdkDragPlaceholder></div>
+            </article>
+          } @empty {
+            <p class="vacia">Nada por aquí</p>
+          }
+        </div>
+
+        @if (estado === 'ENTREGADO') {
+          <a class="ver-todas" routerLink="/reparaciones">Ver el historial completo</a>
+        }
+      </section>
+    }
+  </div>
+}

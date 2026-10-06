@@ -14,7 +14,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./core/layout/shell').then((m) => m.Shell),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'reparaciones' },
+      { path: '', pathMatch: 'full', redirectTo: 'tablero' },
+      {
+        path: 'tablero',
+        title: 'Tablero · FixFlow',
+        loadComponent: () => import('./features/kanban/kanban').then((m) => m.Kanban),
+      },
       {
         path: 'reparaciones',
         loadChildren: () =>
