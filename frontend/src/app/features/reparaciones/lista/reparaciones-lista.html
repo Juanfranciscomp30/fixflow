@@ -24,10 +24,11 @@
 } @else if (!cargando() && reparaciones().length === 0) {
   <p class="aviso">No hay reparaciones{{ filtro() ? ' en este estado' : ' todavía' }}.</p>
 } @else {
+  <div class="tabla-marco">
   <table mat-table [dataSource]="reparaciones()" class="tabla">
     <ng-container matColumnDef="codigo">
       <th mat-header-cell *matHeaderCellDef>Código</th>
-      <td mat-cell *matCellDef="let r" class="codigo">{{ r.codigo }}</td>
+      <td mat-cell *matCellDef="let r" class="codigo codigo-resguardo">{{ r.codigo }}</td>
     </ng-container>
 
     <ng-container matColumnDef="cliente">
@@ -60,4 +61,5 @@
     <tr mat-header-row *matHeaderRowDef="columnas"></tr>
     <tr mat-row *matRowDef="let r; columns: columnas" class="fila" (click)="abrir(r)"></tr>
   </table>
+  </div>
 }

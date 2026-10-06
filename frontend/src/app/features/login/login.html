@@ -1,0 +1,83 @@
+<div class="pantalla">
+  <section class="mostrador" aria-hidden="true">
+    <div class="marca">
+      <mat-icon fontSet="material-symbols-outlined">build</mat-icon>
+      FixFlow
+    </div>
+
+    <!-- La etiqueta de resguardo que se ata a cada equipo en el taller -->
+    <div class="etiqueta">
+      <span class="ojal"></span>
+      <p class="etiqueta-codigo codigo-resguardo">FX-2026-00022</p>
+      <p class="etiqueta-equipo">HP Pavilion 15</p>
+      <p class="etiqueta-averia">No enciende tras derramar agua en el teclado</p>
+      <ol class="etiqueta-pasos">
+        <li class="hecho">Recibido</li>
+        <li class="hecho">Diagnóstico</li>
+        <li class="actual">En reparación</li>
+        <li>Listo</li>
+      </ol>
+    </div>
+
+    <p class="lema">Cada equipo que entra en el taller, controlado de la recepción a la entrega.</p>
+  </section>
+
+  <section class="acceso">
+    <form class="formulario" [formGroup]="form" (ngSubmit)="entrar()">
+      <h1>Entra en el taller</h1>
+      <p class="subtitulo">Usa tu cuenta de FixFlow o prueba la demo con un clic.</p>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="username" />
+        <mat-error>Escribe un email válido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="verPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="verPassword.set(!verPassword())"
+          [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+        >
+          <mat-icon fontSet="material-symbols-outlined">{{ verPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error>Escribe la contraseña</mat-error>
+      </mat-form-field>
+
+      @if (error(); as mensaje) {
+        <p class="error" role="alert">{{ mensaje }}</p>
+      }
+
+      <button mat-flat-button class="entrar" type="submit" [disabled]="entrando()">
+        {{ entrando() ? 'Entrando…' : 'Entrar' }}
+      </button>
+      @if (entrando()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      <div class="demo">
+        <p>Probar sin cuenta</p>
+        <div class="demo-botones">
+          <button mat-stroked-button type="button" (click)="entrarComo('admin')" [disabled]="entrando()">
+            <mat-icon fontSet="material-symbols-outlined">storefront</mat-icon>
+            Administración
+          </button>
+          <button mat-stroked-button type="button" (click)="entrarComo('tecnico')" [disabled]="entrando()">
+            <mat-icon fontSet="material-symbols-outlined">handyman</mat-icon>
+            Técnico
+          </button>
+        </div>
+        <p class="nota">La API está en un plan gratuito: la primera vez puede tardar unos 30 s en despertar.</p>
+      </div>
+    </form>
+  </section>
+</div>
