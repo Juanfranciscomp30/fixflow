@@ -1,6 +1,6 @@
 .marco {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
   min-height: 100dvh;
 }
 
@@ -87,7 +87,7 @@
 
 .contenido {
   min-width: 0;
-  padding: 28px 32px 48px;
+  padding: 28px 28px 48px;
 }
 
 /* En móvil el menú lateral pasa a ser una barra inferior */

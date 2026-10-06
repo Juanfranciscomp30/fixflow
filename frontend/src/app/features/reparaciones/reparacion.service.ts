@@ -7,6 +7,7 @@ import {
   NuevaReparacion,
   ReparacionDetalle,
   ReparacionResumen,
+  Tecnico,
 } from './reparacion.model';
 
 @Injectable({ providedIn: 'root' })
@@ -41,5 +42,14 @@ export class ReparacionService {
 
   responderPresupuesto(id: number, aceptado: boolean): Observable<ReparacionDetalle> {
     return this.http.post<ReparacionDetalle>(`${this.url}/${id}/respuesta-presupuesto`, { aceptado });
+  }
+
+  /** Solo admin: reparte la reparación a un técnico. */
+  asignarTecnico(id: number, tecnicoId: number): Observable<ReparacionDetalle> {
+    return this.http.patch<ReparacionDetalle>(`${this.url}/${id}/tecnico`, { tecnicoId });
+  }
+
+  tecnicos(): Observable<Tecnico[]> {
+    return this.http.get<Tecnico[]>(`${environment.apiUrl}/usuarios/tecnicos`);
   }
 }
