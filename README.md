@@ -3,7 +3,12 @@
 Gestor de reparaciones para talleres informáticos: recepción de equipos, flujo de estados,
 tablero Kanban para técnicos, portal de seguimiento para clientes y métricas del taller.
 
-> 🚧 En desarrollo
+> 🚧 En desarrollo: ya funcionan el login, el tablero Kanban, el listado, la ficha de cada reparación y las métricas.
+
+| Tablero | Métricas |
+|---|---|
+| ![Tablero Kanban](docs/capturas/tablero.png) | ![Dashboard de métricas](docs/capturas/metricas.png) |
+| ![Arrastrando una tarjeta](docs/capturas/tablero-arrastrando.png) | ![Login con acceso de demo](docs/capturas/login.png) |
 
 ## Por qué este proyecto
 
@@ -112,6 +117,21 @@ stateDiagram-v2
   4 dígitos de su teléfono. En un taller real nadie se registra para recoger un portátil.
 - **Historial de estados** para saber quién cambió qué y cuándo.
 - **Bloqueo optimista** (`version`) para que dos técnicos no pisen la misma reparación.
+- **Arrastrar en el Kanban es una operación de negocio, no un cambio de campo**: soltar en
+  «Esperando aprobación» pide diagnóstico y presupuesto; sacar una tarjeta de ahí es apuntar la
+  respuesta del cliente; entregar pide el precio final. El tablero solo deja soltar donde la
+  transición es válida, pero la que decide es la API.
+- **UI optimista**: la tarjeta se mueve al instante y, si la API responde con error (por ejemplo
+  un 409 por una regla del taller), vuelve sola a su columna.
+- **Métricas en SQL nativo** con *projections* de Spring Data: son agregaciones (`GROUP BY`,
+  `date_trunc`, `FILTER`) que se leen mejor en SQL que en JPQL. La facturación reciente usa una
+  ventana de 30 días en vez del mes natural, para que el día 1 no aparezca todo a cero.
+- **Gráficos sin librería**: son barras simples hechas con HTML y CSS. Pesan menos que
+  ngx-charts o Chart.js, no dependen de que la librería saque versión para cada Angular nuevo y
+  siguen la paleta de la aplicación. Los colores están comprobados para daltonismo y cada barra
+  lleva su número escrito.
+- **`@PreAuthorize` en los endpoints de administración**, además de ocultar las pantallas en el
+  frontend: ocultar un botón no es seguridad.
 
 ## API de reparaciones
 
@@ -125,16 +145,21 @@ Todas requieren el JWT de `POST /api/auth/login` en la cabecera `Authorization: 
 | `PUT` | `/api/reparaciones/{id}/diagnostico` | Diagnóstico y presupuesto |
 | `PATCH` | `/api/reparaciones/{id}/estado` | Avanzar de estado (y precio final al entregar) |
 | `POST` | `/api/reparaciones/{id}/respuesta-presupuesto` | El cliente acepta o rechaza; avanza solo a reparación o a listo |
+| `PATCH` | `/api/reparaciones/{id}/tecnico` | Asignar técnico (solo admin) |
+| `GET` | `/api/usuarios/tecnicos` | Técnicos activos, para el desplegable |
+| `GET` | `/api/metricas` | Datos del dashboard (solo admin) |
 
 Los códigos (`FX-2026-00022`) salen de una secuencia de Postgres: se pueden dictar por teléfono y
 escribir en el resguardo. Cada cambio de estado guarda en el historial quién lo hizo (el usuario del token).
 
 ## Limitaciones y próximos pasos
 
-- **El frontend aún no tiene pantalla de login**, así que las pantallas de reparaciones no pueden
-  llamar a la API hasta que se añada (interceptor que envíe el token + guard de rutas).
 - Cada recepción crea un cliente nuevo; buscar un cliente existente llega con la ficha de clientes.
-- Falta asignar técnico desde la interfaz (la entidad ya lo permite).
+- Faltan el portal del cliente (consulta con código + teléfono) y el resguardo en PDF.
+- El tablero no se actualiza solo si otro técnico mueve una tarjeta: hay que recargar. El
+  siguiente paso sería avisar con Server-Sent Events.
+- El token se guarda en `localStorage`; en un producto real valoraría una cookie `HttpOnly`
+  para que un script inyectado no pueda leerlo.
 
 ## Ejecutar en local
 
