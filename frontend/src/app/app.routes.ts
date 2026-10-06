@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, invitadoGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard, invitadoGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -19,6 +19,12 @@ export const routes: Routes = [
         path: 'tablero',
         title: 'Tablero · FixFlow',
         loadComponent: () => import('./features/kanban/kanban').then((m) => m.Kanban),
+      },
+      {
+        path: 'metricas',
+        title: 'Métricas · FixFlow',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./features/dashboard/metricas').then((m) => m.MetricasPagina),
       },
       {
         path: 'reparaciones',
